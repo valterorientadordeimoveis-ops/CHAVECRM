@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>A Chave — CRM imobiliário para corretor</title>
+<meta name="description" content="Organize seus leads, saiba quem chamar hoje e abra o WhatsApp com a mensagem pronta. CRM feito para corretor de imóveis.">
+<style>
+:root{
+  --navy:#0f2747; --navy2:#173f78; --blue:#2563eb; --soft:#dbeafe; --orange:#ff7a1a; --orange2:#e86a0c; --green:#10b981;
+  --ink:#0f172a; --muted:#52627a; --line:#d9e6f6; --bg:#f4f8fd; --card:#fff;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;color:var(--ink);background:var(--bg);line-height:1.55}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+.wrap{width:100%;max-width:1080px;margin:0 auto;padding:0 clamp(16px,4vw,32px)}
+section{padding:clamp(40px,7vw,80px) 0}
+h1{font-size:clamp(2rem,5.4vw,3.4rem);line-height:1.1;margin:0 0 16px}
+h2{font-size:clamp(1.55rem,3.6vw,2.4rem);line-height:1.15;margin:0 0 12px;color:var(--navy)}
+h3{margin:0 0 6px;font-size:1.12rem;color:var(--navy)}
+p{margin:0 0 14px;font-size:clamp(1rem,1.8vw,1.15rem);color:var(--muted)}
+.kicker{display:inline-block;font-weight:800;letter-spacing:.06em;text-transform:uppercase;font-size:.78rem;color:var(--orange);margin-bottom:10px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;background:var(--orange);color:#fff;text-decoration:none;font-weight:800;font-size:1.1rem;padding:16px 26px;border-radius:14px;box-shadow:0 10px 24px rgba(255,122,26,.35);transition:transform .15s,background .15s}
+.btn:hover{background:var(--orange2);transform:translateY(-2px)}
+.btn:focus-visible,a:focus-visible,summary:focus-visible{outline:3px solid var(--blue);outline-offset:3px}
+.btn.ghost{background:transparent;color:#fff;box-shadow:none;border:2px solid rgba(255,255,255,.5)}
+.small{font-size:.9rem;color:var(--muted)}
+/* topo */
+.hero{background:linear-gradient(135deg,var(--navy),var(--navy2));color:#fff;padding:clamp(28px,5vw,56px) 0 clamp(40px,6vw,70px)}
+.brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:1.15rem;margin-bottom:clamp(24px,4vw,44px)}
+.brand .logo{width:42px;height:42px;border-radius:12px;background:#0b203c;border:1px solid rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;font-size:1.3rem}
+.hero p{color:#d9e7ff}
+.hero .lead{font-size:clamp(1.1rem,2.2vw,1.35rem);max-width:720px}
+.hero-grid{display:grid;grid-template-columns:1fr;gap:28px}
+.media{margin-top:8px;border-radius:18px;overflow:hidden;background:#000;box-shadow:0 20px 50px rgba(0,0,0,.35);border:1px solid rgba(255,255,255,.18)}
+.media .ratio{position:relative;padding-top:62%}
+.media iframe,.media video{position:absolute;inset:0;width:100%;height:100%;border:0;background:#fff}
+.media-cap{padding:10px 14px;font-size:.88rem;color:#d9e7ff;background:rgba(0,0,0,.25)}
+.cta-row{display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin-top:22px}
+/* blocos */
+.grid{display:grid;gap:16px;margin-top:22px}
+.g2{grid-template-columns:repeat(2,1fr)}.g3{grid-template-columns:repeat(3,1fr)}
+@media(max-width:820px){.g3{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:560px){.g2,.g3{grid-template-columns:1fr}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:20px;box-shadow:0 8px 22px rgba(15,39,71,.06)}
+.card .ico{font-size:1.7rem;margin-bottom:8px}
+.card p{margin:0;font-size:1rem}
+.pain{list-style:none;margin:18px 0 0;padding:0;display:grid;gap:12px}
+.pain li{display:flex;gap:12px;align-items:flex-start;background:#fff;border:1px solid var(--line);border-left:5px solid #ef4444;border-radius:14px;padding:14px 16px;font-size:1.05rem;color:var(--ink)}
+.alt{background:#fff;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.dark{background:linear-gradient(135deg,var(--navy),var(--navy2));color:#fff}
+.dark h2{color:#fff}.dark p{color:#d9e7ff}
+.steps{counter-reset:s;display:grid;gap:14px;margin-top:20px}
+.step{display:flex;gap:16px;align-items:flex-start;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.18);border-radius:16px;padding:16px 18px}
+.step::before{counter-increment:s;content:counter(s);flex:none;width:44px;height:44px;border-radius:13px;background:var(--orange);color:#fff;font-weight:800;font-size:1.25rem;display:flex;align-items:center;justify-content:center}
+.step h3{color:#fff;margin-bottom:2px}.step p{margin:0;color:#d9e7ff}
+.yes,.no{list-style:none;margin:14px 0 0;padding:0;display:grid;gap:10px}
+.yes li::before{content:"✓";color:#fff;background:var(--green);border-radius:50%;width:24px;height:24px;display:inline-flex;align-items:center;justify-content:center;font-weight:800;font-size:.85rem;margin-right:10px}
+.no li::before{content:"✕";color:#fff;background:#94a3b8;border-radius:50%;width:24px;height:24px;display:inline-flex;align-items:center;justify-content:center;font-weight:800;font-size:.8rem;margin-right:10px}
+.yes li,.no li{font-size:1.02rem;color:var(--ink);display:flex;align-items:flex-start}
+.yes li::before,.no li::before{flex:none}
+details{background:#fff;border:1px solid var(--line);border-radius:14px;padding:4px 18px;margin-bottom:10px}
+summary{cursor:pointer;font-weight:800;color:var(--navy);padding:14px 0;list-style:none;display:flex;justify-content:space-between;gap:10px}
+summary::after{content:"+";font-size:1.4rem;line-height:1;color:var(--orange)}
+details[open] summary::after{content:"–"}
+details p{margin:0 0 16px;font-size:1rem}
+.plans{align-items:stretch}
+.plan{display:flex;flex-direction:column;gap:6px;position:relative}
+.plan .price{font-size:clamp(2.2rem,5vw,3rem);font-weight:800;color:var(--navy);line-height:1.1;margin:4px 0 10px}
+.plan .price .cur{font-size:1.2rem;vertical-align:top}
+.plan .price .per{font-size:1rem;font-weight:700;color:var(--muted)}
+.plan .yes{margin:0 0 18px;flex:1}
+.plan .btn{width:100%}
+.plan.best{border:2px solid var(--orange)}
+.badge{align-self:flex-start;background:var(--orange);color:#fff;font-weight:800;font-size:.75rem;border-radius:999px;padding:5px 12px;margin-bottom:4px}
+.final{text-align:center}
+.final .wrap{max-width:760px}
+footer{padding:28px 0 90px;text-align:center;color:var(--muted);font-size:.9rem}
+.sticky{position:fixed;left:0;right:0;bottom:0;z-index:20;background:rgba(255,255,255,.96);backdrop-filter:blur(6px);border-top:1px solid var(--line);padding:10px 16px;display:none;justify-content:center}
+.sticky .btn{width:100%;max-width:520px;padding:14px 18px;font-size:1.05rem}
+@media(max-width:760px){.sticky{display:flex}}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="wrap">
+    <div class="brand"><span class="logo" aria-hidden="true">🔑</span> A Chave</div>
+    <span class="kicker">CRM imobiliário para corretor</span>
+    <h1>Pare de perder cliente por esquecer de dar retorno.</h1>
+    <p class="lead">A Chave organiza os seus leads, mostra quem você precisa chamar hoje e abre o WhatsApp com a mensagem pronta. Tudo em uma tela simples, no celular ou no computador.</p>
+    <div class="hero-grid">
+      <div class="media" id="media">
+        <div class="ratio" id="mediaBox"></div>
+        <div class="media-cap" id="mediaCap">Veja como funciona. Passe as páginas com as setas.</div>
+      </div>
+    </div>
+    <div class="cta-row">
+      <a class="btn" data-cta href="#contato">Quero conhecer a ferramenta →</a>
+      <a class="btn ghost" href="#como">Como funciona</a>
+    </div>
+  </div>
+</header>
+
+<section>
+  <div class="wrap">
+    <span class="kicker">Você se identifica?</span>
+    <h2>O que acontece quando o seu controle é uma planilha, um caderno ou a memória</h2>
+    <ul class="pain">
+      <li>🔥 O cliente pediu retorno na sexta e você só lembrou na quarta, quando ele já tinha falado com outro corretor.</li>
+      <li>📒 Seus contatos estão espalhados: planilha, WhatsApp, caderno, anotação no celular.</li>
+      <li>❓ Você não sabe quantos clientes estão em visita, em proposta ou esfriando.</li>
+      <li>📱 Trocou de celular ou perdeu a planilha, e levou junto a sua base de clientes.</li>
+    </ul>
+    <p style="margin-top:20px"><strong style="color:var(--navy)">O problema quase nunca é falta de cliente. É falta de organização para acompanhar cada um no tempo certo.</strong></p>
+  </div>
+</section>
+
+<section class="alt">
+  <div class="wrap">
+    <span class="kicker">A solução</span>
+    <h2>Um CRM simples, feito para o dia a dia do corretor</h2>
+    <div class="grid g3">
+      <div class="card"><div class="ico">🎯</div><h3>Painel do dia</h3><p>Ao abrir, você já vê quantos retornos estão pendentes e quem chamar primeiro.</p></div>
+      <div class="card"><div class="ico">⏰</div><h3>Follow-ups sem esquecer</h3><p>Atrasados e retornos de hoje separados, com data de próximo contato em cada cliente.</p></div>
+      <div class="card"><div class="ico">🧭</div><h3>Kanban do seu jeito</h3><p>Crie quantos funis quiser e monte as colunas como no seu WhatsApp: nome, ícone, cor e ordem.</p></div>
+      <div class="card"><div class="ico">📥</div><h3>Importe sua base</h3><p>Traga clientes de uma planilha Excel ou CSV, ou copie e cole uma lista. Com prévia e aviso de repetidos.</p></div>
+      <div class="card"><div class="ico">💬</div><h3>WhatsApp com mensagem pronta</h3><p>Toque no nome, escolha WhatsApp ou ligação. Oito mensagens prontas com o nome do cliente, que você edita.</p></div>
+      <div class="card"><div class="ico">☁️</div><h3>Backup no Google Drive</h3><p>Salve uma cópia dos seus clientes no Drive e restaure quando precisar.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="dark" id="como">
+  <div class="wrap">
+    <span class="kicker">Como funciona</span>
+    <h2>Em 3 passos você já está usando</h2>
+    <div class="steps">
+      <div class="step"><div><h3>Traga seus contatos</h3><p>Importe sua planilha, cole uma lista ou cadastre um por um.</p></div></div>
+      <div class="step"><div><h3>Monte o seu funil</h3><p>Escolha as regiões, as fontes e as colunas do Kanban que fazem sentido para o seu trabalho.</p></div></div>
+      <div class="step"><div><h3>Comece o dia pelos follow-ups</h3><p>Chame os atrasados, registre cada contato e marque a próxima data. Dez minutos por dia.</p></div></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="grid g2" style="margin-top:0">
+      <div class="card">
+        <h2 style="font-size:1.5rem">Para quem é</h2>
+        <ul class="yes">
+          <li>Corretor autônomo ou de imobiliária que quer organizar a própria carteira.</li>
+          <li>Quem recebe leads de anúncio, Instagram, indicação e lista de contatos.</li>
+          <li>Quem quer um sistema simples, sem curso para aprender a usar.</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h2 style="font-size:1.5rem">O que a ferramenta não é</h2>
+        <ul class="no">
+          <li>Não é disparador: ela não manda mensagem sozinha. Abre o WhatsApp e você envia.</li>
+          <li>Não compra anúncio nem gera leads: ela organiza os que você já tem.</li>
+          <li>Seus dados ficam no seu aparelho. Por isso o backup é importante.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="planos">
+  <div class="wrap">
+    <span class="kicker">Planos</span>
+    <h2>Escolha como quer usar</h2>
+    <p>O mesmo acesso completo nos dois planos. A diferença é só a forma de pagar.</p>
+    <div class="grid g2 plans">
+      <div class="card plan">
+        <h3>Mensal</h3>
+        <div class="price"><span class="cur">R$</span> 14 <span class="per">/mês</span></div>
+        <ul class="yes">
+          <li>Painel do dia e follow-ups</li>
+          <li>Kanban com colunas editáveis</li>
+          <li>Importação por Excel, CSV ou colar lista</li>
+          <li>WhatsApp com mensagens prontas</li>
+          <li>Backup no Google Drive</li>
+          <li><strong>Sem plano de fidelidade</strong></li>
+        </ul>
+        <a class="btn" data-cta data-plan="mensal" href="#contato">Quero o plano mensal</a>
+      </div>
+      <div class="card plan best">
+        <div class="badge">Melhor para quem usa todo dia</div>
+        <h3>Anual</h3>
+        <div class="price"><span class="cur">R$</span> 147 <span class="per">/ano</span></div>
+        <p class="small" style="margin:-4px 0 12px">Equivale a R$ 12,25 por mês.</p>
+        <ul class="yes">
+          <li>Tudo do plano mensal</li>
+          <li>Um único pagamento no ano</li>
+          <li>Sem se preocupar com a renovação todo mês</li>
+          <li><strong>Sem plano de fidelidade</strong></li>
+        </ul>
+        <a class="btn" data-cta data-plan="anual" href="#contato">Quero o plano anual</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="alt">
+  <div class="wrap">
+    <span class="kicker">Dúvidas</span>
+    <h2>Perguntas rápidas</h2>
+    <details><summary>Preciso instalar alguma coisa?</summary><p>Não. A ferramenta abre no navegador do celular ou do computador. No celular, você pode deixar um atalho na tela inicial.</p></details>
+    <details><summary>Onde ficam os dados dos meus clientes?</summary><p>No navegador do seu próprio aparelho. Eu não vejo nem guardo os seus clientes. Por isso existe o backup, que você pode salvar no Google Drive.</p></details>
+    <details><summary>Funciona no celular e no computador?</summary><p>Sim. Cada aparelho guarda os próprios dados; para levar de um para outro, use o backup e a restauração.</p></details>
+    <details><summary>Ela manda mensagem para os clientes sozinha?</summary><p>Não. Ela abre o WhatsApp com o texto pronto, você revisa e envia. Nada é enviado automaticamente.</p></details>
+    <details><summary>Consigo trazer a minha lista de clientes atual?</summary><p>Sim. Você importa uma planilha Excel ou CSV, ou copia e cola a lista. A ferramenta mostra uma prévia antes de salvar.</p></details>
+    <details><summary>Tem plano de fidelidade?</summary><p>Não. Não existe fidelidade nem multa: você usa enquanto fizer sentido para o seu trabalho.</p></details>
+    <details><summary>Como eu recebo e quanto custa?</summary><p id="faqPreco">O plano mensal é R$ 14 por mês e o anual é R$ 147 por ano. Chame no WhatsApp pelo botão abaixo e eu explico como receber o acesso.</p></details>
+  </div>
+</section>
+
+<section class="final dark" id="contato">
+  <div class="wrap">
+    <h2>Organize seus clientes e não deixe mais nenhuma venda esfriar</h2>
+    <p>Fale comigo no WhatsApp e veja a ferramenta funcionando.</p>
+    <div class="cta-row" style="justify-content:center"><a class="btn" data-cta href="#contato">Falar no WhatsApp →</a></div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">Criado por Valter Ferreira · Corretor de Imóveis · CRECI 282987-SP</div>
+</footer>
+
+<div class="sticky"><a class="btn" data-cta href="#contato">Quero conhecer a ferramenta →</a></div>
+
+<script>
+/* ===== CONFIGURAÇÃO (troque aqui) ===== */
+var WHATS = "5511955503917";   // WhatsApp para o botão, com 55 + DDD, só números
+var MENSAGEM = "Olá! Vi a página da A Chave (CRM para corretor) e quero conhecer a ferramenta.";
+var VIDEO_URL = "";            // cole o link do vídeo (YouTube ou arquivo .mp4). Vazio = mostra o passo a passo interativo.
+var MOSTRAR_PRECOS = true;     // true = mostra os planos (R$ 14/mês e R$ 147/ano). false = esconde os valores da página.
+/* ====================================== */
+
+(function(){
+  function wa(msg){ return "https://wa.me/" + WHATS + "?text=" + encodeURIComponent(msg); }
+  [].forEach.call(document.querySelectorAll("[data-cta]"), function(a){
+    var plano = a.getAttribute("data-plan");
+    a.href = wa(plano ? "Olá! Vi a página da A Chave e quero o plano " + plano + "." : MENSAGEM);
+    a.target = "_blank"; a.rel = "noopener";
+  });
+  if (!MOSTRAR_PRECOS) {
+    var sec = document.getElementById("planos"); if (sec) sec.remove();
+    var faq = document.getElementById("faqPreco");
+    if (faq) faq.textContent = "Chame no WhatsApp pelo botão abaixo e eu explico como funciona o acesso e as condições.";
+  }
+
+  var box = document.getElementById("mediaBox"), cap = document.getElementById("mediaCap");
+  var url = (VIDEO_URL || "").trim();
+  var yt = url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([\w-]{11})/);
+  if (yt) {
+    box.innerHTML = '<iframe src="https://www.youtube.com/embed/' + yt[1] + '?rel=0" title="Vídeo de apresentação da A Chave" allow="accelerometer; encrypted-media; picture-in-picture; fullscreen" allowfullscreen loading="lazy"></iframe>';
+    cap.textContent = "Assista ao vídeo e veja como a ferramenta funciona.";
+  } else if (/\.mp4(\?|$)/i.test(url)) {
+    box.innerHTML = '<video controls playsinline preload="metadata" src="' + url.replace(/"/g, "") + '"></video>';
+    cap.textContent = "Assista ao vídeo e veja como a ferramenta funciona.";
+  } else {
+    box.innerHTML = '<iframe src="apresentacao.html" title="Passo a passo da A Chave" loading="lazy"></iframe>';
+  }
+})();
+</script>
+</body>
+</html>

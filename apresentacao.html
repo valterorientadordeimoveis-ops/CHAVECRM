@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>A Chave CRM — Passo a passo</title>
+<style>
+:root{
+  --navy:#0f2747; --navy2:#173f78; --blue:#2563eb; --soft:#dbeafe; --orange:#ff7a1a; --green:#10b981;
+  --ink:#0f172a; --muted:#52627a; --line:#d9e6f6; --bg:#f4f8fd; --card:#ffffff;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;color:var(--ink);background:var(--bg)}
+button{font:inherit;cursor:pointer;border:0}
+.deck{position:fixed;inset:0 0 56px 0;overflow:hidden}
+.slide{position:absolute;inset:0;display:none;padding:clamp(16px,3vw,44px);overflow:auto}
+.slide.active{display:flex;flex-direction:column;justify-content:center;animation:in .35s ease}
+@keyframes in{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.slide.active{animation:none}}
+.wrap{width:100%;max-width:1120px;margin:0 auto}
+.dark{background:linear-gradient(135deg,var(--navy),var(--navy2));color:#fff}
+.dark p,.dark li{color:#d9e7ff}
+.kicker{display:inline-block;font-weight:800;letter-spacing:.06em;text-transform:uppercase;font-size:.78rem;color:var(--orange);margin-bottom:10px}
+h1{font-size:clamp(2rem,5.5vw,3.6rem);line-height:1.08;margin:0 0 14px}
+h2{font-size:clamp(1.4rem,3.2vw,2.2rem);line-height:1.15;margin:0}
+p{font-size:clamp(1rem,1.8vw,1.15rem);line-height:1.55;margin:0 0 12px;color:var(--muted)}
+.lead{font-size:clamp(1.1rem,2.2vw,1.4rem)}
+.step{display:flex;align-items:center;gap:14px;margin-bottom:14px}
+.num{flex:none;width:46px;height:46px;border-radius:14px;background:var(--orange);color:#fff;font-weight:800;font-size:1.25rem;display:flex;align-items:center;justify-content:center}
+.split{display:grid;grid-template-columns:5fr 7fr;gap:26px;align-items:start}
+.split.wide{grid-template-columns:1fr}
+@media(max-width:900px){.split{grid-template-columns:1fr}}
+.grid{display:grid;gap:14px;margin-top:16px}
+.g2{grid-template-columns:repeat(2,1fr)}.g3{grid-template-columns:repeat(3,1fr)}
+@media(max-width:760px){.g2,.g3{grid-template-columns:1fr}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:18px;box-shadow:0 8px 22px rgba(15,39,71,.06)}
+.card h3{margin:0 0 6px;font-size:1.1rem;color:var(--navy)}
+.card p{font-size:1rem;margin:0}
+.card .ico{font-size:1.6rem;margin-bottom:6px}
+ul.list{margin:6px 0 0;padding:0;list-style:none;display:grid;gap:10px}
+ul.list li{display:flex;gap:12px;align-items:flex-start;font-size:clamp(.98rem,1.7vw,1.1rem);line-height:1.45;color:var(--ink)}
+ul.list li::before{content:"✓";flex:none;width:24px;height:24px;border-radius:50%;background:var(--green);color:#fff;font-weight:800;display:flex;align-items:center;justify-content:center;font-size:.85rem;margin-top:1px}
+.dark ul.list li{color:#fff}
+.tip{margin-top:16px;border-left:5px solid var(--orange);background:#fff7ed;color:#7c3a0a;padding:12px 16px;border-radius:0 12px 12px 0;font-size:1rem;line-height:1.5}
+.warn{margin-top:16px;border-left:5px solid #ef4444;background:#fef2f2;color:#7f1d1d;padding:12px 16px;border-radius:0 12px 12px 0;font-size:1rem;line-height:1.5}
+.dark .tip{background:rgba(255,255,255,.1);color:#fff}
+.fakechip{display:inline-block;margin-top:6px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.3);color:#fff;border-radius:999px;padding:8px 14px;font-weight:700;font-size:.9rem}
+
+/* ===== Telas de exemplo (dados fictícios) ===== */
+.fict{font-size:.74rem;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);margin:0 0 6px 4px}
+.mock{border:1px solid var(--line);background:#fff;border-radius:18px;padding:12px;box-shadow:0 10px 26px rgba(15,39,71,.09);overflow:hidden;font-size:.85rem;color:#1e293b;text-align:left}
+.mock *{box-sizing:border-box}
+.mock .scroll{overflow:auto}
+.pill{display:inline-block;padding:6px 11px;border-radius:999px;font-weight:800;font-size:.76rem;background:#e8f2ff;color:#1e40af;white-space:nowrap}
+.pill.on{background:#fff;color:var(--navy);box-shadow:0 0 0 2px var(--navy)}
+.pill.new{background:var(--orange);color:#fff}
+.pill.dark{background:#174c96;color:#fff}
+.bar{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+.cols{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(150px,1fr);gap:8px;min-width:900px}
+.c{border-radius:12px;background:#eef4fd;overflow:hidden;min-height:150px}
+.c b{display:flex;justify-content:space-between;color:#fff;padding:8px 10px;font-size:.76rem}
+.k{margin:7px;padding:8px;background:#fff;border-radius:10px;box-shadow:0 2px 7px rgba(15,39,71,.1);line-height:1.35}
+.k strong{display:block;font-size:.8rem;color:#0f2747}
+.k small{display:block;color:#64748b;font-size:.7rem}
+.chip{display:inline-block;background:#dbeafe;color:#2563eb;border-radius:99px;padding:2px 7px;font-size:.66rem;font-weight:800}
+.t-over{color:#b91c1c;font-weight:800}.t-today{color:#b45309;font-weight:800}.t-up{color:#047857;font-weight:800}
+.kpis{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:10px}
+@media(max-width:560px){.kpis{grid-template-columns:repeat(2,1fr)}}
+.kpi{background:#f7fbff;border:1px solid var(--line);border-radius:12px;padding:9px}
+.kpi small{display:block;color:var(--muted);font-weight:800;text-transform:uppercase;font-size:.62rem}
+.kpi strong{font-size:1.35rem;color:var(--navy)}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media(max-width:640px){.two{grid-template-columns:1fr}}
+.box{border:1px solid var(--line);border-radius:14px;padding:10px;background:#fff}
+.box h4{margin:0 0 8px;font-size:.82rem;color:var(--navy)}
+.prio{display:flex;justify-content:space-between;gap:8px;align-items:center;background:#f7fbff;border:1px solid var(--line);border-radius:12px;padding:8px 10px;margin-bottom:6px}
+.prio strong{display:block;font-size:.82rem;color:var(--navy)}
+.prio small{color:#64748b;font-size:.7rem}
+.tag{border-radius:99px;padding:6px 9px;font-size:.7rem;font-weight:800;background:#fee2e2;color:#b91c1c;white-space:nowrap}
+.tag.ok{background:#dcfce7;color:#166534}.tag.am{background:#fef3c7;color:#92400e}
+.bars .r{display:grid;grid-template-columns:96px 1fr 22px;gap:6px;align-items:center;margin-bottom:6px;font-size:.72rem}
+.bars .b{height:10px;background:#eaf2ff;border-radius:99px;overflow:hidden}.bars .b i{display:block;height:100%;border-radius:99px}
+table.t{width:100%;border-collapse:collapse;min-width:620px}
+table.t th{background:#edf4ff;color:#375475;text-transform:uppercase;font-size:.64rem;letter-spacing:.03em;text-align:left;padding:9px 8px}
+table.t td{border-top:1px solid #e5edf7;padding:8px;font-size:.76rem;vertical-align:middle}
+table.t td b{color:#153d6d;display:block}
+table.t td small{color:#64748b}
+.sel{display:inline-block;background:#f6faff;border:1px solid #d5e2f5;border-radius:9px;padding:5px 9px;font-size:.72rem;white-space:nowrap}
+.tb{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+.tb span{background:#fff;border:1px solid var(--line);border-radius:11px;padding:8px 10px;font-size:.74rem;color:#475569}
+.tb span.grow{flex:2;min-width:150px}
+.fs{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:10px}
+@media(max-width:560px){.fs{grid-template-columns:repeat(2,1fr)}}
+.fs div{background:#fff;border:1px solid var(--line);border-radius:12px;padding:9px}
+.fs div.on{outline:2px solid var(--blue);background:#eff6ff}
+.fs small{color:#64748b;font-weight:800;font-size:.68rem}.fs strong{display:block;font-size:1.3rem;color:#173c69}
+.frow{display:grid;grid-template-columns:1.2fr 1.2fr auto;gap:8px;align-items:center;background:#fff;border:1px solid #dbe7f7;border-left:5px solid #3b82f6;border-radius:12px;padding:9px;margin-bottom:7px}
+.frow.over{border-left-color:#ef4444}.frow.today{border-left-color:#f59e0b}
+@media(max-width:640px){.frow{grid-template-columns:1fr}}
+.frow strong{color:#153d6d;font-size:.82rem}.frow small{display:block;color:#64748b;font-size:.7rem}
+.mini{display:flex;gap:5px;flex-wrap:wrap}
+.mini span{padding:6px 8px;border-radius:9px;font-size:.68rem;font-weight:800;white-space:nowrap}
+.m-wa{background:#dcfce7;color:#166534}.m-ph{background:#dbeafe;color:#1d4ed8}.m-mt{background:#e0e7ff;color:#3730a3}.m-sv{background:#fff1d6;color:#92400e}.m-ed{background:#fff7ed;color:#c2410c}
+.modalm{max-width:430px;margin:0 auto;border:1px solid var(--line);border-radius:16px;overflow:hidden}
+.modalm .h{padding:12px 14px;border-bottom:1px solid #e9eef6;font-weight:800;color:var(--navy)}
+.modalm .bd{padding:12px 14px}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:8px 0}
+.opts span{display:flex;justify-content:center;padding:14px;border-radius:12px;font-weight:800;font-size:.9rem}
+.det{background:#f8fbff;border-radius:10px;padding:8px 10px;color:#334155;font-size:.76rem;margin-bottom:8px}
+.bubble{background:#dcf8c6;border-radius:12px 12px 2px 12px;padding:10px 12px;font-size:.82rem;line-height:1.45;color:#1f2d1f;margin-left:auto;max-width:90%}
+.chat{background:#efeae2;border-radius:12px;padding:12px;margin-top:8px}
+.fld{margin-bottom:8px}.fld small{display:block;font-weight:700;color:var(--navy);font-size:.7rem;margin-bottom:3px}
+.fld div{background:#f8fbff;border:1px solid var(--line);border-radius:10px;padding:8px 10px;font-size:.78rem}
+.sr{display:flex;align-items:center;gap:6px;flex-wrap:wrap;background:#f5f9ff;border:1px solid var(--line);border-radius:12px;padding:8px;margin-bottom:6px;font-size:.76rem}
+.sr .ic{width:40px;text-align:center;background:#fff;border:1px solid var(--line);border-radius:9px;padding:6px}
+.sr .nm{flex:1;min-width:120px;background:#fff;border:1px solid var(--line);border-radius:9px;padding:6px 9px;font-weight:700}
+.sr .co{width:22px;height:22px;border-radius:7px;border:1px solid #cbd5e1}
+.sr .fi{color:#475569;font-weight:700;font-size:.7rem}
+.sr .ar{color:#1e40af;font-weight:800;background:#e0ecff;border-radius:8px;padding:4px 7px}
+.sr small{color:#64748b}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chips span{background:#f5f9ff;border:1px solid var(--line);border-radius:10px;padding:6px 9px;font-size:.74rem;font-weight:700}
+.chips span em{font-style:normal;color:#64748b;font-weight:600;margin-left:4px}
+.file{display:flex;align-items:center;gap:10px;background:#f8fbff;border:1px dashed #93c5fd;border-radius:12px;padding:10px;margin-top:8px}
+.checks{display:grid;gap:9px;margin-top:12px}
+.checks label{display:flex;gap:12px;align-items:center;background:#fff;border:1px solid var(--line);border-radius:14px;padding:13px;font-size:1.02rem;color:var(--ink);cursor:pointer}
+.checks input{width:22px;height:22px;accent-color:var(--green)}
+
+/* navegação */
+.nav{position:fixed;left:0;right:0;bottom:0;height:56px;background:#fff;border-top:1px solid var(--line);display:flex;align-items:center;gap:10px;padding:0 14px;z-index:5}
+.nav button{padding:10px 16px;border-radius:12px;font-weight:800;background:var(--navy);color:#fff}
+.nav button.ghost{background:#eef4fd;color:var(--navy)}
+.nav button:disabled{opacity:.35;cursor:not-allowed}
+.nav button:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
+.prog{flex:1;height:8px;background:#e5edf8;border-radius:99px;overflow:hidden}
+.prog span{display:block;height:100%;width:0;background:var(--orange);transition:width .3s}
+.count{font-weight:800;color:var(--navy);min-width:56px;text-align:center;font-size:.9rem}
+@media(max-width:520px){.nav .ghost.pdf{display:none}}
+@media print{
+  .nav{display:none}.deck{position:static;overflow:visible}
+  .slide{display:flex!important;position:static;min-height:100vh;page-break-after:always;break-after:page;animation:none}
+  *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .mock .scroll{overflow:visible}.cols{min-width:0}
+}
+</style>
+</head>
+<body>
+<main class="deck" id="deck">
+
+<!-- 1 CAPA -->
+<section class="slide dark active"><div class="wrap">
+  <span class="kicker">Passo a passo</span>
+  <h1>A Chave<br>CRM imobiliário para corretor</h1>
+  <p class="lead">Aprenda a usar em 10 minutos: organize seus clientes, saiba quem chamar hoje e não deixe nenhuma venda esfriar.</p>
+  <div class="tip">Use as setas do teclado, os botões abaixo ou deslize a tela para trocar de página.</div>
+</div></section>
+
+<!-- 2 O QUE FAZ -->
+<section class="slide"><div class="wrap">
+  <span class="kicker">Antes de começar</span>
+  <h2>O que a ferramenta faz por você</h2>
+  <div class="grid g2">
+    <div class="card"><div class="ico">🗂️</div><h3>Organiza seus clientes</h3><p>Todos os contatos em um só lugar, separados por região, projeto e etapa da negociação.</p></div>
+    <div class="card"><div class="ico">⏰</div><h3>Lembra quem chamar hoje</h3><p>Mostra os retornos do dia e os atrasados, para ninguém ficar sem resposta.</p></div>
+    <div class="card"><div class="ico">💬</div><h3>Ajuda no contato</h3><p>Abre o WhatsApp ou a ligação com um toque e traz mensagens prontas com o nome do cliente.</p></div>
+    <div class="card"><div class="ico">📱</div><h3>Celular e computador</h3><p>Funciona no navegador. Seus dados ficam guardados no seu aparelho.</p></div>
+  </div>
+</div></section>
+
+<!-- 3 VISÃO GERAL -->
+<section class="slide"><div class="wrap">
+  <span class="kicker">Veja como fica</span>
+  <h2>Seu painel do dia</h2>
+  <p>Ao abrir, você já vê quantos clientes tem, quantos precisam de retorno e quem chamar primeiro.</p>
+  <div class="mock" data-mock="dash"></div>
+</div></section>
+
+<!-- 4 PASSO 1 -->
+<section class="slide"><div class="wrap">
+  <div class="step"><div class="num">1</div><h2>Abrir a ferramenta</h2></div>
+  <div class="split">
+    <div>
+      <ul class="list">
+        <li>Abra o link (ou o arquivo) da ferramenta no navegador.</li>
+        <li>No celular, deixe um atalho na tela inicial: no menu do navegador, escolha <strong>“Adicionar à tela inicial”</strong>.</li>
+        <li>Use sempre o <strong>mesmo navegador e o mesmo aparelho</strong>.</li>
+      </ul>
+      <div class="warn"><strong>Importante:</strong> os dados ficam salvos no navegador do aparelho. Se limpar os dados do navegador, eles somem. Por isso o passo 10 (backup) é obrigatório.</div>
+    </div>
+    <div><div class="fict">Como fica no celular</div>
+      <div class="mock" style="max-width:340px;margin:0 auto;text-align:center;padding:18px">
+        <div style="font-size:.8rem;color:#64748b;margin-bottom:10px">Menu do navegador ⋮</div>
+        <div class="sel" style="display:block;padding:10px;margin-bottom:6px">Nova guia</div>
+        <div class="sel" style="display:block;padding:10px;margin-bottom:6px;border:2px solid var(--orange);font-weight:800">➕ Adicionar à tela inicial</div>
+        <div class="sel" style="display:block;padding:10px">Compartilhar</div>
+        <div style="margin-top:16px;display:inline-flex;flex-direction:column;align-items:center;gap:4px"><span style="width:54px;height:54px;border-radius:15px;background:linear-gradient(135deg,#123D72,#0B203C);display:flex;align-items:center;justify-content:center;font-size:1.6rem">🔑</span><small style="color:#334155;font-weight:700">A Chave</small></div>
+      </div></div>
+  </div>
+</div></section>
+
+<!-- 5 PASSO 2 -->
+<section class="slide"><div class="wrap">
+  <div class="step"><div class="num">2</div><h2>Preencher o seu perfil</h2></div>
+  <div class="split">
+    <div>
+      <p>Toque em <strong>👤 Perfil do Corretor</strong> e preencha:</p>
+      <ul class="list"><li>Seu nome profissional</li><li>CRECI</li><li>WhatsApp de atendimento</li></ul>
+      <p style="margin-top:14px">Depois toque em <strong>Salvar perfil</strong>. É rápido e só precisa fazer uma vez.</p>
+    </div>
+    <div><div class="mock" data-mock="profile"></div></div>
+  </div>
+</div></section>
+
+<!-- 6 PASSO 3 -->
+<section class="slide"><div class="wrap">
+  <div class="step"><div class="num">3</div><h2>Deixar com a sua cara</h2></div>
+  <div class="split">
+    <div>
+      <p>Em <strong>⚙️ Regiões e ajustes</strong>, tudo pode ser criado, renomeado ou excluído:</p>
+      <ul class="list">
+        <li><strong>Regiões e projetos</strong>: viram abas no funil.</li>
+        <li><strong>Fontes de captação</strong>: de onde o cliente veio.</li>
+        <li><strong>Situações de follow-up</strong>: os passos do seu acompanhamento.</li>
+        <li><strong>Mensagens prontas</strong>: 8 textos de WhatsApp. Use <strong>[Nome]</strong> para entrar o nome do cliente.</li>
+      </ul>
+    </div>
+    <div><div class="mock" data-mock="settings"></div></div>
+  </div>
+</div></section>
+
+<!-- 7 PASSO 4 - visão geral -->
+<section class="slide"><div class="wrap">
+  <div class="step"><div class="num">4</div><h2>Colocar seus clientes (leads)</h2></div>
+  <p>Você não precisa digitar um por um. Escolha o caminho que for mais fácil para você:</p>
+  <div class="grid g3">
+    <div class="card"><div class="ico">📊</div><h3>Importar planilha</h3><p>Tem sua base em Excel ou CSV? Escolha o arquivo e pronto. Centenas de clientes de uma vez.</p></div>
+    <div class="card"><div class="ico">📋</div><h3>Copiar e colar</h3><p>Tem a lista no WhatsApp, no bloco de notas ou em outro sistema? Copie, cole e confira.</p></div>
+    <div class="card"><div class="ico">➕</div><h3>Um por um</h3><p>Botão <strong>+ Novo Cliente</strong>, para o cliente que acabou de chegar.</p></div>
+  </div>
+  <div class="tip">Nos três casos, a ferramenta mostra uma <strong>prévia</strong> antes de salvar e <strong>não envia mensagem nenhuma</strong>.</div>
+</div></section>
+
+<!-- 7B IMPORTAR PLANILHA -->
+<section class="slide"><div class="wrap">
+  <div class="step"><div class="num">4</div><h2>Importar sua base de Excel ou CSV</h2></div>
+  <div class="split">
+    <div>
+      <ul class="list">
+        <li>Vá em <strong>Importar / Backup</strong>.</li>
+        <li>Toque em <strong>📂 Selecionar arquivo</strong> e escolha a planilha (.xlsx, .xls, .csv ou .txt). A primeira aba é a lida.</li>
+        <li>As colunas são reconhecidas sozinhas: <strong>Nome, Telefone, Região, Fonte, Situação, Renda, FGTS, Data de retorno, Observações e Etapa</strong>.</li>
+        <li>Planilha sem cabeçalho? Use essa mesma ordem.</li>
+        <li>Quer partir de um modelo? Toque em <strong>⬇️ Baixar modelo CSV</strong>.</li>
+      </ul>
+      <div class="tip">Telefone sempre com DDD. Para ler Excel (.xlsx) é preciso estar com internet. CSV funciona sem internet.</div>
+    </div>
+    <div><div class="fict">Sua planilha</div><div class="mock" data-mock="sheet"></div>
+      <div class="fict" style="margin-top:12px">Na ferramenta</div><div class="mock" data-mock="importpage"></div></div>
+  </div>
+</div></section>
+
+<!-- 7C COPIAR E COLAR -->
+<section class="slide"><div class="wrap">
+  <div class="step"><div class="num">4</div><h2>Copiar e colar a sua lista</h2></div>
+  <div class="split">
+    <div>
+      <ul class="list">
+        <li>Abra a lista onde ela estiver: WhatsApp, bloco de notas, e-mail ou outro sistema.</li>
+        <li>Deixe <strong>uma pessoa por linha</strong>, neste formato: <em>Nome, telefone com DDD, região</em>.</li>
+        <li>Copie tudo e cole na caixa de <strong>Importar / Backup</strong>.</li>
+        <li>Toque em <strong>🔍 Conferir lista colada</strong>.</li>
+      </ul>
+      <div class="tip">Também funciona copiando direto de uma planilha aberta: as colunas ficam separadas automaticamente.</div>
+    </div>
+    <div><div class="fict">Exemplo de lista colada</div><div class="mock" data-mock="paste"></div></div>
+  </div>
+</div></section>
+
+<!-- 7D PRÉVIA -->
+<section class="slide"><div class="wrap">
+  <div class="step"><div class="num">4</div><h2>Conferir a prévia e confirmar</h2></div>
+  <div class="split">
+    <div>
+      <ul class="list">
+        <li>Antes de salvar, você vê quantos clientes são <strong>novos</strong>.</li>
+        <li>Números que <strong>já existem</strong> aparecem como Duplicado e são ignorados.</li>
+        <li>Linhas sem nome ou sem telefone válido aparecem como Inválido.</li>
+        <li>Tudo certo? Toque em <strong>✅ Confirmar importação</strong>.</li>
+        <li>Cada cliente entra na <strong>Caixa de entrada</strong>, na aba da sua região.</li>
+      </ul>
+    </div>
+    <div><div class="fict">Prévia da importação</div><div class="mock" data-mock="import"></div></div>
+  </div>
+</div></section>
+
+<!-- 8 PASSO 5 -->
+<section class="slide"><div class="wrap">
+  <div class="step"><div class="num">5</div><h2>Funil Kanban: o quadro dos seus negócios</h2></div>
+  <p>Cada coluna é uma etapa. Arraste o cartão do cliente para a coluna certa. Em <strong>+ Novo Kanban</strong> você cria outro funil com as suas colunas.</p>
+  <div class="fict">Deslize para o lado para ver todas as colunas</div>
+  <div class="mock" data-mock="kanban"></div>
+</div></section>
+
+<!-- 9 PASSO 5B -->
+<section class="slide"><div class="wrap">
+  <div class="step"><div class="num">5</div><h2>Monte as colunas do seu jeito</h2></div>
+  <div class="split">
+    <div>
+      <p>Toque em <strong>✏️ Editar colunas deste Kanban</strong>:</p>
+      <ul class="list">
+        <li>Crie, renomeie e exclua etapas.</li>
+        <li>Troque o <strong>ícone</strong> e a <strong>cor</strong>.</li>
+        <li>Mude a ordem com <strong>↑ ↓</strong>.</li>
+        <li>Marque <strong>“Etapa final”</strong> nas colunas em que o cliente não precisa mais de follow-up (Fechado, Perdido…).</li>
+      </ul>
+      <div class="tip">Quer o mesmo funil que você já usa no WhatsApp? Crie um Kanban novo e copie os nomes das suas etapas.</div>
+    </div>
+    <div><div class="mock" data-mock="editor"></div></div>
+  </div>
+</div></section>
+
+<!-- 10 PASSO 6 -->
+<section class="slide"><div class="wrap">
+  <div class="step"><div class="num">6</div><h2>Todos os Leads: a lista completa</h2></div>
+  <div class="split">
+    <div>
+      <ul class="list">
+        <li>Busque por nome, telefone, região ou observação.</li>
+        <li>Filtre por região e por etapa.</li>
+        <li>Troque região, etapa ou Kanban direto na linha.</li>
+        <li>Marque vários e <strong>transfira de uma vez</strong> para outra região.</li>
+        <li>Toque no nome para escolher <strong>WhatsApp</strong> ou <strong>Ligação</strong>.</li>
+      </ul>
+      <div class="warn"><strong>Cuidado:</strong> “Excluir selecionados” apaga de verdade. Faça backup antes.</div>
+    </div>
+    <div><div class="mock" data-mock="list"></div></div>
+  </div>
+</div></section>
+
+<!-- 11 PASSO 7 -->
+<section class="slide"><div class="wrap">
+  <div class="step"><div class="num">7</div><h2>Follow-ups: quem chamar hoje</h2></div>
+  <div class="split">
+    <div>
+      <ul class="list">
+        <li><strong>Atrasados</strong> (borda vermelha): comece por eles.</li>
+        <li><strong>Para hoje</strong> (borda laranja): os retornos do dia.</li>
+        <li>Mude a <strong>situação</strong> e a <strong>data</strong> na própria linha. Salva sozinho.</li>
+        <li>Falou com o cliente? Toque em <strong>Registrar contato</strong> e marque a próxima data.</li>
+      </ul>
+    </div>
+    <div><div class="mock" data-mock="follow"></div></div>
+  </div>
+</div></section>
+
+<!-- 12 PASSO 8 -->
+<section class="slide"><div class="wrap">
+  <div class="step"><div class="num">8</div><h2>Falar com o cliente</h2></div>
+  <div class="split">
+    <div>
+      <p>Toque no nome do cliente (no painel, na lista ou nos follow-ups).</p>
+      <ul class="list">
+        <li>Escolha <strong>WhatsApp</strong> ou <strong>Ligação</strong>. Nada é enviado sozinho.</li>
+        <li>O WhatsApp abre com a mensagem pronta e <strong>você revisa e envia</strong>.</li>
+        <li>Na aba <strong>Scripts</strong>, escolha o cliente e a mensagem: o nome entra automático.</li>
+      </ul>
+    </div>
+    <div><div class="mock" data-mock="contact"></div></div>
+  </div>
+</div></section>
+
+<!-- 13 MATERIAL -->
+<section class="slide"><div class="wrap">
+  <div class="step"><div class="num">9</div><h2>Mandou um eBook ou catálogo? Registre</h2></div>
+  <div class="split">
+    <div>
+      <ul class="list">
+        <li>Depois de enviar, toque em <strong>📎 Material enviado</strong>.</li>
+        <li>Escolha o que foi enviado e a data da cobrança.</li>
+        <li>A ferramenta marca <strong>“aguardando resposta”</strong> e agenda o retorno.</li>
+        <li>Ela <strong>não envia</strong> o material: só registra.</li>
+      </ul>
+    </div>
+    <div><div class="mock" data-mock="material"></div></div>
+  </div>
+</div></section>
+
+<!-- 14 BACKUP -->
+<section class="slide dark"><div class="wrap">
+  <div class="step"><div class="num">10</div><h2>Backup: proteja seus clientes</h2></div>
+  <div class="split">
+    <div>
+      <ul class="list">
+        <li>Vá em <strong>Importar / Backup</strong> e toque em <strong>☁️ Salvar backup no Google Drive</strong>. No celular, escolha o Drive na lista que abre.</li>
+        <li>No computador (Chrome ou Edge), ligue o <strong>backup automático</strong> e escolha uma pasta do Google Drive: a cada alteração o arquivo se atualiza sozinho.</li>
+        <li>Quando faltar backup, a ferramenta <strong>avisa no painel</strong>.</li>
+        <li>Trocou de celular ou limpou o navegador? Use <strong>Restaurar backup JSON</strong>.</li>
+        <li>Na restauração, clientes com o mesmo telefone não são duplicados.</li>
+      </ul>
+      <div class="tip">Seus clientes são o seu patrimônio. Um backup leva 10 segundos.</div>
+    </div>
+    <div><div class="mock" data-mock="backup"></div></div>
+  </div>
+</div></section>
+
+<!-- 15 ROTINA -->
+<section class="slide"><div class="wrap">
+  <span class="kicker">Para usar todo dia</span>
+  <h2>Rotina de 10 minutos</h2>
+  <div class="checks">
+    <label><input type="checkbox"> Abrir o painel e ver as prioridades do dia</label>
+    <label><input type="checkbox"> Ir em Follow-ups e chamar os atrasados primeiro</label>
+    <label><input type="checkbox"> Depois de cada conversa, registrar contato e marcar a próxima data</label>
+    <label><input type="checkbox"> Mover os cartões no Kanban conforme a negociação avança</label>
+    <label><input type="checkbox"> Cadastrar os clientes novos que chegaram</label>
+    <label><input type="checkbox"> Na sexta-feira: exportar o backup</label>
+  </div>
+</div></section>
+
+<!-- 16 DÚVIDAS -->
+<section class="slide"><div class="wrap">
+  <span class="kicker">Dúvidas comuns</span>
+  <h2>Perguntas rápidas</h2>
+  <div class="grid g2">
+    <div class="card"><h3>Onde ficam meus dados?</h3><p>No navegador do seu aparelho. Não são enviados para ninguém.</p></div>
+    <div class="card"><h3>Posso usar no celular e no computador?</h3><p>Sim, mas cada aparelho guarda os próprios dados. Para levar de um para outro, use backup e restauração.</p></div>
+    <div class="card"><h3>A ferramenta manda mensagem sozinha?</h3><p>Não. Ela abre o WhatsApp com o texto pronto e você envia.</p></div>
+    <div class="card"><h3>Apaguei um cliente sem querer.</h3><p>Restaure o último backup. Por isso ele é tão importante.</p></div>
+  </div>
+</div></section>
+
+<!-- 17 FIM -->
+<section class="slide dark"><div class="wrap">
+  <span class="kicker">Pronto</span>
+  <h1>Agora é só usar.</h1>
+  <p class="lead">Cadastre seus primeiros clientes, monte o seu Kanban e comece o dia pelos follow-ups.</p>
+  <ul class="list">
+    <li>Perfil preenchido</li>
+    <li>Regiões e Kanban ajustados</li>
+    <li>Backup toda semana</li>
+  </ul>
+</div></section>
+
+</main>
+
+<nav class="nav" aria-label="Navegação da apresentação">
+  <button type="button" id="prev" aria-label="Página anterior">← Anterior</button>
+  <div class="prog" aria-hidden="true"><span id="bar"></span></div>
+  <span class="count" id="count" aria-live="polite">1 / 1</span>
+  <button type="button" id="next" aria-label="Próxima página">Próximo →</button>
+  <button type="button" class="ghost pdf" id="pdf">Salvar em PDF</button>
+</nav>
+
+<script>
+/* ===== Dados FICTÍCIOS usados só nas telas de exemplo ===== */
+var TODAY=new Date();
+function dt(off){var x=new Date(TODAY);x.setDate(x.getDate()+off);return String(x.getDate()).padStart(2,"0")+"/"+String(x.getMonth()+1).padStart(2,"0");}
+function dtFull(off){var x=new Date(TODAY);x.setDate(x.getDate()+off);return x.getFullYear()+"-"+String(x.getMonth()+1).padStart(2,"0")+"-"+String(x.getDate()).padStart(2,"0");}
+var ST=[
+ {id:"entrada",n:"Caixa de entrada",i:"📥",c:"#476b9e"},
+ {id:"novo",n:"Novos leads",i:"🔵",c:"#2563eb"},
+ {id:"atendimento",n:"Atendimento",i:"🟠",c:"#f59e0b"},
+ {id:"visita",n:"Visita agendada",i:"🟣",c:"#8b5cf6"},
+ {id:"proposta",n:"Proposta",i:"🌸",c:"#ec4899"},
+ {id:"fechado",n:"Fechado",i:"🟢",c:"#10b981"}
+];
+var D1="Dia 1 - Abordagem Inicial",D2="Dia 2 - Pós Visita",D3="Dia 3 - Envio de Simulação",D4="Dia 4 - Tentativa WhatsApp",D5="Dia 5 - Oferta Especial",MAT="Material/eBook enviado — aguardando resposta";
+var RAW=[
+ ["Mariana Costa","Lapa","entrada","Instagram",D1,0],
+ ["Rafael Nogueira","Osasco","entrada","Facebook / Anúncios",D1,1],
+ ["Bianca Torres","Guarulhos","entrada","Lista de contatos",D1,0],
+ ["Eduardo Matos","Lapa","novo","WhatsApp",D2,-1],
+ ["Camila Ribeiro","Zona Leste","novo","Indicação",D1,2],
+ ["Thiago Barros","Guarulhos","novo","Instagram",D3,-3],
+ ["Patrícia Gomes","Lapa","atendimento","Indicação",D2,0],
+ ["Lucas Ferreira","Osasco","atendimento","Instagram",D3,1],
+ ["Juliana Prado","Zona Leste","atendimento","WhatsApp",D4,-2],
+ ["André Cardoso","Guarulhos","atendimento","Ação de rua",D5,3],
+ ["Renata Souza","Lapa","visita","Indicação",D2,2],
+ ["Gustavo Pereira","Guarulhos","visita","Instagram",D2,0],
+ ["Vanessa Lima","Osasco","visita","Facebook / Anúncios",D3,4],
+ ["Felipe Andrade","Zona Leste","proposta","Indicação",D5,1],
+ ["Larissa Martins","Lapa","proposta","Instagram",MAT,0],
+ ["Carlos Henrique","Lapa","fechado","Indicação","",null],
+ ["Daniela Rocha","Guarulhos","fechado","Instagram","",null],
+ ["Marcos Vinícius","Osasco","fechado","WhatsApp","",null]
+];
+var L=RAW.map(function(r,k){return {name:r[0],region:r[1],stage:r[2],src:r[3],status:r[4],ret:r[5],phone:"(11) 90000-0"+(101+k)};});
+function stg(id){return ST.filter(function(s){return s.id===id;})[0];}
+function closed(l){return l.stage==="fechado";}
+function state(l){if(closed(l)||l.ret===null)return"closed";return l.ret<0?"over":l.ret===0?"today":"up";}
+function retTxt(l){if(l.ret===null)return"—";var c=state(l)==="over"?"t-over":state(l)==="today"?"t-today":"t-up";return '<span class="'+c+'">'+(l.ret===0?"Hoje":dt(l.ret))+'</span>';}
+function active(){return L.filter(function(l){return !closed(l);});}
+function byRet(a,b){return (a.ret===null?99:a.ret)-(b.ret===null?99:b.ret);}
+var unique=function(a){return a.filter(function(v,i){return a.indexOf(v)===i;});};
+
+var M={};
+M.dash=function(){
+  var a=active(), pend=a.filter(function(l){return l.ret<=0;}).length;
+  var cnt=function(id){return L.filter(function(l){return l.stage===id;}).length;};
+  var pr=a.slice().sort(byRet).slice(0,4).map(function(l){
+    var late=l.ret<=0;
+    return '<div class="prio"><div><strong>'+l.name+' ↗</strong><small>'+stg(l.stage).n+' • '+l.region+' • retorno '+(l.ret===0?"hoje":dt(l.ret))+'</small></div><span class="tag '+(late?'':'ok')+'">'+(late?"Resolver hoje ↗":"Próximo passo ↗")+'</span></div>';
+  }).join("");
+  var max=Math.max.apply(null,ST.map(function(s){return cnt(s.id);}));
+  var bars=ST.map(function(s){return '<div class="r"><span>'+s.n+'</span><span class="b"><i style="width:'+(cnt(s.id)/max*100)+'%;background:'+s.c+'"></i></span><b>'+cnt(s.id)+'</b></div>';}).join("");
+  return '<div class="kpis"><div class="kpi"><small>Leads ativos</small><strong>'+a.length+'</strong></div><div class="kpi"><small>Pendentes hoje</small><strong style="color:#ff7a1a">'+pend+'</strong></div><div class="kpi"><small>Visitas</small><strong style="color:#8b5cf6">'+cnt("visita")+'</strong></div><div class="kpi"><small>Propostas</small><strong style="color:#ec4899">'+cnt("proposta")+'</strong></div><div class="kpi"><small>Fechados</small><strong style="color:#10b981">'+cnt("fechado")+'</strong></div></div>'
+   +'<div class="two"><div class="box"><h4>🎯 Prioridades do dia</h4>'+pr+'</div><div class="box"><h4>📊 Distribuição por etapa</h4><div class="bars">'+bars+'</div><div class="prio" style="margin:10px 0 0;background:#fff7ed;border-color:#fed7aa"><div><strong>🚨 Radar de acompanhamento</strong><small>Existem '+pend+' clientes com retorno para hoje ou atrasado.</small></div></div></div></div>';
+};
+M.profile=function(){
+  return '<div class="fld"><small>Nome profissional</small><div>Ana Souza</div></div><div class="two"><div class="fld"><small>CRECI</small><div>123456-F</div></div><div class="fld"><small>WhatsApp de atendimento</small><div>(11) 90000-0000</div></div></div><div style="text-align:right"><span class="pill new" style="padding:9px 14px">Salvar perfil</span></div>';
+};
+M.settings=function(){
+  var rg=unique(L.map(function(l){return l.region;})).map(function(r){return '<span>📍 '+r+'<em>'+L.filter(function(l){return l.region===r;}).length+' leads</em></span>';}).join("");
+  var sc=unique(L.map(function(l){return l.src;})).map(function(r){return '<span>'+r+'</span>';}).join("");
+  var ss=[D1,D2,D3,D4,D5].map(function(r){return '<span>'+r+'</span>';}).join("");
+  return '<div class="box" style="margin-bottom:8px"><h4>📍 Regiões e projetos</h4><div class="chips">'+rg+'<span style="background:#ff7a1a;color:#fff;border:0">+ Criar região</span></div></div><div class="box" style="margin-bottom:8px"><h4>📣 Fontes de captação</h4><div class="chips">'+sc+'</div></div><div class="box"><h4>📲 Situações / Follow-up</h4><div class="chips">'+ss+'</div></div>';
+};
+M.import=function(){
+  var rows=[["Paulo Nunes","(11) 90000-0201","Lapa","Pronto"],["Sandra Dias","(11) 90000-0202","Osasco","Pronto"],["Mariana Costa","(11) 90000-0101","Lapa","Duplicado"],["Igor Santana","(11) 90000-0203","Guarulhos","Pronto"],["Helena Cruz","(11) 90000-0204","Zona Leste","Pronto"],["Contato sem número","—","Lapa","Inválido"]];
+  var tr=rows.map(function(r){var c=r[3]==="Pronto"?"t-up":r[3]==="Duplicado"?"t-today":"t-over";return '<tr><td><b>'+r[0]+'</b></td><td>'+r[1]+'</td><td>'+r[2]+'</td><td class="'+c+'">'+r[3]+'</td></tr>';}).join("");
+  return '<div style="margin-bottom:8px;color:#475569">lista-colada • <strong>4 novos</strong> • 1 duplicado ignorado • 1 linha inválida.</div><div class="scroll"><table class="t" style="min-width:420px"><thead><tr><th>Cliente</th><th>WhatsApp</th><th>Região</th><th>Status</th></tr></thead><tbody>'+tr+'</tbody></table></div><div style="margin-top:10px"><span class="pill new" style="padding:9px 14px">✅ Confirmar importação</span></div>';
+};
+M.kanban=function(){
+  var regs=unique(L.map(function(l){return l.region;}));
+  var tabs='<span class="pill dark">🗂️ Todas <b>'+L.length+'</b></span>'+regs.map(function(r){return '<span class="pill">📍 '+r+' <b>'+L.filter(function(l){return l.region===r;}).length+'</b></span>';}).join("");
+  var cols=ST.map(function(s){
+    var items=L.filter(function(l){return l.stage===s.id;});
+    var cards=items.map(function(l){return '<div class="k"><strong>'+l.name+'</strong><span class="chip">'+l.region+'</span><small>📱 '+l.phone+'</small><small>📅 '+retTxt(l)+'</small></div>';}).join("");
+    return '<div class="c"><b style="background:'+s.c+'"><span>'+s.i+' '+s.n+'</span><span>'+items.length+'</span></b>'+cards+'</div>';
+  }).join("");
+  return '<div class="bar"><span class="pill on">🗂️ Funil comercial <b>'+L.length+'</b></span><span class="pill new">+ Novo Kanban</span></div><div class="bar">'+tabs+'</div><div class="scroll"><div class="cols">'+cols+'</div></div>';
+};
+M.editor=function(){
+  var rows=ST.map(function(s,i){return '<div class="sr"><span class="ic">'+s.i+'</span><span class="nm">'+s.n+'</span><span class="co" style="background:'+s.c+'"></span><span class="fi">'+(s.id==="fechado"?"☑":"☐")+' Etapa final</span><small>'+L.filter(function(l){return l.stage===s.id;}).length+' lead(s)</small><span class="ar">↑</span><span class="ar">↓</span></div>';}).join("");
+  var nova='<div class="sr" style="border:2px solid var(--orange)"><span class="ic">📄</span><span class="nm">Aguardando documentos</span><span class="co" style="background:#0ea5e9"></span><span class="fi">☐ Etapa final</span><small>0 lead(s)</small><span class="ar">↑</span><span class="ar">↓</span></div>';
+  return '<div class="fld"><small>Nome do Kanban</small><div>Funil comercial</div></div>'+rows+nova+'<div style="display:flex;justify-content:space-between;margin-top:10px"><span class="pill">+ Criar etapa</span><span class="pill new" style="padding:8px 14px">Salvar Kanban</span></div>';
+};
+M.list=function(){
+  var rows=L.slice().sort(function(a,b){return a.name.localeCompare(b.name,"pt-BR");}).slice(0,8).map(function(l){
+    return '<tr><td><b>'+l.name+'</b><small>'+l.phone+'</small></td><td><span class="sel">'+l.region+'</span></td><td><span class="sel">'+stg(l.stage).i+' '+stg(l.stage).n+'</span></td><td><span class="sel">'+(l.status||"—")+'</span></td><td>'+retTxt(l)+'</td></tr>';
+  }).join("");
+  return '<div class="tb"><span class="grow">🔎 Buscar nome, telefone, região…</span><span>📍 Todas as regiões</span><span>🧭 Todas as etapas</span></div><div class="scroll"><table class="t"><thead><tr><th>Cliente / Telefone</th><th>Região</th><th>Etapa</th><th>Follow-up</th><th>Retorno</th></tr></thead><tbody>'+rows+'</tbody></table></div><div style="margin-top:8px;color:#64748b;font-size:.74rem">Exibindo 8 de '+L.length+' leads.</div>';
+};
+M.follow=function(){
+  var a=active(), pend=a.filter(function(l){return l.ret<=0;}), over=a.filter(function(l){return l.ret<0;}).length, today=a.filter(function(l){return l.ret===0;}).length;
+  var rows=pend.sort(byRet).slice(0,5).map(function(l){
+    var o=l.ret<0;
+    return '<div class="frow '+(o?"over":"today")+'"><div><strong>'+l.name+'</strong><small>'+l.region+' • '+l.phone+'</small><small>'+stg(l.stage).n+' • '+(o?"Atrasado":"Hoje")+'</small></div><div><span class="sel">'+l.status+'</span> <span class="sel">'+(o?dt(l.ret):"Hoje")+'</span></div><div class="mini"><span class="m-wa">WhatsApp</span><span class="m-ph">Ligar</span><span class="m-sv">Registrar contato</span></div></div>';
+  }).join("");
+  return '<div class="fs"><div class="on"><small>Pendentes</small><strong>'+pend.length+'</strong></div><div><small>Atrasados</small><strong>'+over+'</strong></div><div><small>Para hoje</small><strong>'+today+'</strong></div><div><small>Em acompanhamento</small><strong>'+a.length+'</strong></div></div>'+rows;
+};
+M.contact=function(){
+  var l=L[6];
+  return '<div class="modalm"><div class="h">Falar com '+l.name+'</div><div class="bd"><div class="opts"><span class="m-wa">💬 WhatsApp</span><span class="m-ph">📞 Ligação</span></div><div class="det">Telefone cadastrado: '+l.phone+' • '+l.region+'</div><div class="mini"><span class="m-mt">📎 Material/eBook enviado</span><span class="m-ed">✎ Editar ficha</span></div></div></div>'
+   +'<div class="chat"><div class="bubble">Fala '+l.name.split(" ")[0]+', tudo certo? Passando para saber o que você achou do imóvel que visitamos. Conseguiu conversar com a família? Me conta!</div></div><div style="margin-top:6px;color:#64748b;font-size:.72rem">O WhatsApp abre com o texto pronto. Você lê, ajusta se quiser e toca em enviar.</div>';
+};
+M.material=function(){
+  var l=L[14];
+  return '<div class="fld"><small>O que foi enviado?</small><div>eBook</div></div><div class="two"><div class="fld"><small>Data do envio</small><div>'+dt(0)+'</div></div><div class="fld"><small>Próximo contato / cobrança</small><div>'+dt(2)+'</div></div></div><div class="fld"><small>Observação</small><div>Enviei o eBook do empreendimento. Ver se recebeu e tirar dúvidas.</div></div><div style="text-align:right;margin-bottom:12px"><span class="pill new" style="padding:9px 14px">✓ Salvar e agendar retorno</span></div>'
+   +'<div class="k" style="margin:0;border:1px solid var(--line)"><strong>'+l.name+'</strong><span class="chip">'+l.region+'</span><small>📊 '+MAT+'</small><small>📅 Retorno: '+dt(2)+'</small><div style="margin-top:6px;background:#e0e7ff;color:#3730a3;border-radius:9px;padding:6px 8px;font-size:.7rem;font-weight:700">📎 eBook enviado em '+dt(0)+' • aguardando resposta</div></div>';
+};
+M.backup=function(){
+  return '<div class="det" style="margin-bottom:10px">☁️ Último backup: hoje, 18:30 • 0 alteração(ões) desde então • Backup automático na pasta “Google Drive” (ligado)</div><div class="mini" style="margin-bottom:10px"><span class="pill new" style="padding:8px 12px">☁️ Salvar backup no Google Drive</span><span class="pill">💾 Exportar backup JSON</span><span class="pill">📤 Restaurar backup JSON</span></div>'
+   +'<div class="file"><span style="font-size:1.6rem">📄</span><div><strong style="color:#0f2747">a-chave-clientes-'+dtFull(0)+'.json</strong><div style="color:#64748b;font-size:.72rem">'+L.length+' clientes • salvo no seu aparelho</div></div></div>'
+   +'<div class="det" style="margin-top:10px">✅ Restaurar: 12 cliente(s) novos adicionados, 6 já existiam (mesmo telefone) e foram ignorados.</div>';
+};
+M.sheet=function(){
+  var rows=[["Paulo Nunes","11 90000-0201","Lapa","Instagram","Dia 1 - Abordagem Inicial","4.200","Sim"],["Sandra Dias","11 90000-0202","Osasco","Indicação","Dia 1 - Abordagem Inicial","3.800","Não"],["Igor Santana","11 90000-0203","Guarulhos","WhatsApp","Dia 2 - Pós Visita","5.100","Sim"],["Helena Cruz","11 90000-0204","Zona Leste","Facebook / Anúncios","Dia 1 - Abordagem Inicial","3.500","Sim"]];
+  var tr=rows.map(function(r,i){return '<tr><td style="background:#f1f5f9;color:#64748b;text-align:center">'+(i+2)+'</td>'+r.map(function(c){return '<td>'+c+'</td>';}).join("")+'</tr>';}).join("");
+  var th=["Nome","Telefone","Região","Fonte","Situação","Renda","FGTS"].map(function(c){return '<th style="background:#e2e8f0;color:#334155">'+c+'</th>';}).join("");
+  return '<div class="scroll"><table class="t" style="min-width:560px"><thead><tr><th style="background:#e2e8f0;width:28px"></th>'+th+'</tr></thead><tbody>'+tr+'</tbody></table></div><div style="margin-top:6px;color:#64748b;font-size:.72rem">minha-base.xlsx</div>';
+};
+M.importpage=function(){
+  return '<div class="mini" style="margin-bottom:8px"><span class="pill new" style="padding:9px 14px">📂 Selecionar arquivo do celular</span><span class="pill" style="padding:9px 14px">⬇️ Baixar modelo CSV</span></div><div style="color:#475569;font-size:.78rem">Arquivo selecionado: minha-base.xlsx</div>';
+};
+M.paste=function(){
+  var lines=["Paulo Nunes, 11 90000-0201, Lapa","Sandra Dias, 11 90000-0202, Osasco","Igor Santana, 11 90000-0203, Guarulhos","Helena Cruz, 11 90000-0204, Zona Leste","Mariana Costa, 11 90000-0101, Lapa"];
+  return '<div style="background:#f8fbff;border:1px solid var(--line);border-radius:12px;padding:12px;font-family:ui-monospace,Consolas,monospace;font-size:.78rem;line-height:1.7;color:#1e293b">'+lines.join("<br>")+'</div><div style="margin-top:10px"><span class="pill new" style="padding:9px 14px">🔍 Conferir lista colada</span></div>';
+};
+[].forEach.call(document.querySelectorAll("[data-mock]"),function(el){var f=M[el.getAttribute("data-mock")];if(f)el.innerHTML=f();});
+
+/* ===== Navegação ===== */
+(function(){
+  var slides=[].slice.call(document.querySelectorAll(".slide"));
+  var i=0, prev=document.getElementById("prev"), next=document.getElementById("next"),
+      bar=document.getElementById("bar"), count=document.getElementById("count");
+  function show(n){
+    i=Math.max(0,Math.min(slides.length-1,n));
+    slides.forEach(function(s,k){s.classList.toggle("active",k===i);});
+    slides[i].scrollTop=0;
+    prev.disabled=i===0; next.disabled=i===slides.length-1;
+    bar.style.width=((i+1)/slides.length*100)+"%";
+    count.textContent=(i+1)+" / "+slides.length;
+    try{history.replaceState(null,"","#"+(i+1));}catch(e){}
+  }
+  prev.addEventListener("click",function(){show(i-1);});
+  next.addEventListener("click",function(){show(i+1);});
+  document.getElementById("pdf").addEventListener("click",function(){window.print();});
+  document.addEventListener("keydown",function(e){
+    if(e.target && /INPUT|TEXTAREA/.test(e.target.tagName) && e.key===" ")return;
+    if(e.key==="ArrowRight"||e.key==="PageDown"||e.key===" "){e.preventDefault();show(i+1);}
+    if(e.key==="ArrowLeft"||e.key==="PageUp"){e.preventDefault();show(i-1);}
+    if(e.key==="Home")show(0);
+    if(e.key==="End")show(slides.length-1);
+  });
+  var x0=null;
+  var deck=document.getElementById("deck");
+  deck.addEventListener("touchstart",function(e){x0=e.touches[0].clientX;},{passive:true});
+  deck.addEventListener("touchend",function(e){
+    if(x0===null)return; var dx=e.changedTouches[0].clientX-x0; x0=null;
+    if(Math.abs(dx)>80 && !e.target.closest(".scroll"))show(dx<0?i+1:i-1);
+  },{passive:true});
+  var h=parseInt((location.hash||"").slice(1),10);
+  show(isNaN(h)?0:h-1);
+})();
+</script>
+</body>
+</html>
