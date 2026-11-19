@@ -227,7 +227,7 @@ footer{padding:28px 0 90px;text-align:center;color:var(--muted);font-size:.9rem}
     <details><summary>Ela manda mensagem para os clientes sozinha?</summary><p>Não. Ela abre o WhatsApp com o texto pronto, você revisa e envia. Nada é enviado automaticamente.</p></details>
     <details><summary>Consigo trazer a minha lista de clientes atual?</summary><p>Sim. Você importa uma planilha Excel ou CSV, ou copia e cola a lista. A ferramenta mostra uma prévia antes de salvar.</p></details>
     <details><summary>Tem plano de fidelidade?</summary><p>Não. Não existe fidelidade nem multa: você usa enquanto fizer sentido para o seu trabalho.</p></details>
-    <details><summary>Como eu recebo e quanto custa?</summary><p id="faqPreco">O plano mensal é R$ 14 por mês e o anual é R$ 147 por ano. Chame no WhatsApp pelo botão abaixo e eu explico como receber o acesso.</p></details>
+    <details><summary>Como eu recebo e quanto custa?</summary><p id="faqPreco">O plano mensal é R$ 14 por mês e o anual é R$ 147 por ano. É só clicar no botão do plano escolhido, pagar e o acesso chega automaticamente no seu e-mail.</p></details>
   </div>
 </section>
 
@@ -251,13 +251,20 @@ var WHATS = "5511955503917";   // WhatsApp para o botão, com 55 + DDD, só núm
 var MENSAGEM = "Olá! Vi a página da A Chave (CRM para corretor) e quero conhecer a ferramenta.";
 var VIDEO_URL = "";            // cole o link do vídeo (YouTube ou arquivo .mp4). Vazio = mostra o passo a passo interativo.
 var MOSTRAR_PRECOS = true;     // true = mostra os planos (R$ 14/mês e R$ 147/ano). false = esconde os valores da página.
+var CHECKOUT_MENSAL = "https://pay.kiwify.com.br/8EIMbKD"; // link de checkout do plano mensal na Kiwify
+var CHECKOUT_ANUAL  = "https://pay.kiwify.com.br/6sI1G1M"; // link de checkout do plano anual na Kiwify
 /* ====================================== */
 
 (function(){
   function wa(msg){ return "https://wa.me/" + WHATS + "?text=" + encodeURIComponent(msg); }
+  var CHECKOUT = { mensal: CHECKOUT_MENSAL, anual: CHECKOUT_ANUAL };
   [].forEach.call(document.querySelectorAll("[data-cta]"), function(a){
     var plano = a.getAttribute("data-plan");
-    a.href = wa(plano ? "Olá! Vi a página da A Chave e quero o plano " + plano + "." : MENSAGEM);
+    if (plano && CHECKOUT[plano]) {
+      a.href = CHECKOUT[plano];
+    } else {
+      a.href = wa(MENSAGEM);
+    }
     a.target = "_blank"; a.rel = "noopener";
   });
   if (!MOSTRAR_PRECOS) {
